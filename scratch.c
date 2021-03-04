@@ -27,6 +27,7 @@ typedef struct {
 } Cell;
 
 typedef struct {
+  String_View key;
   size_t size;
   Cell *array;
 } Latin_Square;
@@ -43,12 +44,13 @@ size_t exponent(size_t n)
 Latin_Square make_latin_square(String_View key)
 {
   Latin_Square square;
+  square.key = key;
   square.array = (Cell *)malloc(key.count * key.count * sizeof(Cell));
   assert(square.array != NULL);
   size_t r = -1;
-  square.size = key.count;
+  square.size = key.count * key.count;
   //  printf("%lu", square.key);
-  for (size_t j = 0; j < (key.count * key.count); j++) {
+  for (size_t j = 0; j < square.size; j++) {
     if (j % key.count == 0) r++;
     square.array[j] = (Cell) { .row = r,
 			       .col = (j % key.count),
@@ -61,9 +63,9 @@ Latin_Square make_latin_square(String_View key)
 void print_latin_square(Latin_Square *square)
 {
   //size_t s = sizeof(square->square) / sizeof  square->square[0];
-  for (size_t i = 0; i < (square->size * square->size); i++)  {
+  for (size_t i = 0; i < square->size; i++)  {
     printf("%c ", square->array[i].elem);
-    if (square->array[i].col == (square->size - 1)) printf("\n"); 
+    if (square->array[i].col == (square->key.count - 1)) printf("\n"); 
   }
 
 }
@@ -71,7 +73,7 @@ void print_latin_square(Latin_Square *square)
 int main(int argc, char **argv)
 {
   
-  String_View key = SV("abcdefghijklmnopqrstuvwxyz");
+  String_View key = SV("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
   Latin_Square a = make_latin_square(key);
   print_latin_square(&a);
   free(a.array);
