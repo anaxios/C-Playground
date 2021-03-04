@@ -45,16 +45,16 @@ Latin_Square make_latin_square(String_View key)
 {
   Latin_Square square;
   square.key = key;
+  square.size = key.count * key.count;
   square.array = (Cell *)malloc(key.count * key.count * sizeof(Cell));
   assert(square.array != NULL);
   size_t r = -1;
-  square.size = key.count * key.count;
   //  printf("%lu", square.key);
-  for (size_t j = 0; j < square.size; j++) {
-    if (j % key.count == 0) r++;
-    square.array[j] = (Cell) { .row = r,
-			       .col = (j % key.count),
-			       .elem = key.data[(r + j) % key.count]};
+  for (size_t tuple = 0; tuple < square.size; tuple++) {
+    if (tuple % key.count == 0) r++;
+    square.array[tuple] = (Cell) { .row = r,
+			       .col = (tuple % key.count),
+			       .elem = key.data[(r + tuple) % key.count]};
   }
 
   return square;
@@ -63,9 +63,9 @@ Latin_Square make_latin_square(String_View key)
 void print_latin_square(Latin_Square *square)
 {
   //size_t s = sizeof(square->square) / sizeof  square->square[0];
-  for (size_t i = 0; i < square->size; i++)  {
-    printf("%c ", square->array[i].elem);
-    if (square->array[i].col == (square->key.count - 1)) printf("\n"); 
+  for (size_t tuple = 0; tuple < square->size; tuple++)  {
+    printf("%c ", square->array[tuple].elem);
+    if (square->array[tuple].col == (square->key.count - 1)) printf("\n"); 
   }
 
 }
