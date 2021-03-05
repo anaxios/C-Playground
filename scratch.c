@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <math.h>
 #include <time.h>
+#include <gcrypt.h>
 
 typedef struct {
   size_t count;
@@ -180,6 +181,76 @@ void randomize_square(Latin_Square *square)
   //printf("\n%d\n", rand());
 }
 
+typedef struct {
+  size_t count;
+  const unsigned char *data;
+} Hash_View;
+
+unsigned char* hash(Hash_View *key, unsigned char *buffer)
+{
+  /* for (size_t i = 0; i < key->count; i++) { */
+  /*   printf("%02x", key->data[i]); /\* print the result *\/ */
+  /* } */
+  //  printf("\n");
+  unsigned int l = gcry_md_get_algo_dlen(GCRY_MD_SHA512);
+  gcry_md_hd_t h;
+  gcry_md_open(&h, GCRY_MD_SHA512, GCRY_MD_FLAG_SECURE);
+  //gcry_md_enable(h, GCRY_MD_SHA512);
+  gcry_md_write(h, key->data, key->count);
+  unsigned char *x = gcry_md_read(h, GCRY_MD_SHA512);
+  //gcry_md_close(h);
+  for (size_t i = 0; i < l; i++) {
+    //   printf("%02x", x[i]); /* print the result */
+    buffer[i] = x[i];
+  }
+  //  printf("\n");
+  gcry_md_close(h);
+  return buffer;
+}
+
+
+
+void encode_square(Latin_Square *square, String_View *key)
+{
+  unsigned int l = gcry_md_get_algo_dlen(GCRY_MD_SHA512);
+  
+  unsigned char *buffer = (unsigned char*)malloc(l);
+  Hash_View x;
+  x.data = (unsigned char*)key->data;
+  x.count = key->count;
+  x.data = hash(&x, buffer);
+  x.count = sizeof(x.data);
+
+  
+  size_t n = 0;
+  while (n < 1 ) {
+    x.data = hash(&x, buffer);
+    /* for (size_t i = 0; i < l; i++) { */
+    /*   printf("%02x", x.data[i]); /\* print the result *\/ */
+
+    /* } */
+    /* printf("\n\n"); */
+
+    for (size_t index = 0; index < (l - 1); index++) {
+      if (x.data[index] % 3 == 0) {
+      	swap_cells(square,
+      		   square->key.data[x.data[index] % square->key.count],
+      		   square->key.data[x.data[index + 1] % square->key.count]);
+      } else if  (x.data[index] % 3 == 1) {
+	swap_rows(square,
+		  x.data[index] % square->key.count,
+		  x.data[index + 1] % square->key.count);
+      } else {
+	swap_rows(square,
+		  x.data[index] % square->key.count,
+		  x.data[index + 1] % square->key.count);
+      }
+    }
+    
+    n++;
+  }
+  free(buffer);
+}
 Latin_Square make_latin_square(String_View key)
 {
   Latin_Square square;
@@ -221,15 +292,16 @@ void print_latin_square(Latin_Square *square, size_t flag)
 int main(int argc, char **argv)
 {
   
-  String_View key = SV("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-  // String_View key = SV("ABCDEFGHIJKLM");
-  Latin_Square a = make_latin_square(key);
+  String_View seed = SV("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+  String_View key = SV("monkey123");
+  Latin_Square a = make_latin_square(seed);
 
   // swap_cells(&a, 'A', 'Z');
   // swap_cols(&a, 1, 5);
   // swap_rows(&a, 4, 3);
   // swap_rows(&a, 3, 4);
-  randomize_square(&a);
+  //randomize_square(&a);
+   encode_square(&a, &key);
   // printf("\n");
   print_latin_square(&a, 0);
 
