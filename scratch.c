@@ -83,18 +83,18 @@ void swap_cells(Latin_Square *square, char elem1, char elem2)
   }
 }
 
-void swap_cols(Latin_Square *square, size_t col1, size_t col2)
-{
-  for (size_t tuple = 0; tuple < square->size; tuple++) {
-    if (square->array[tuple].col == col1) {
-      square->array[tuple].col = '0';
-      /*   continue; */
-    } else if (square->array[tuple].col == col2) {
-      square->array[tuple].col = col1;
-      /*   continue; */
-    }    
-  }
-}
+/* void swap_cols(Latin_Square *square, size_t col1, size_t col2) */
+/* { */
+/*   for (size_t tuple = 0; tuple < square->size; tuple++) { */
+/*     if (square->array[tuple].col == col1) { */
+/*       square->array[tuple].col = '0'; */
+/*       /\*   continue; *\/ */
+/*     } else if (square->array[tuple].col == col2) { */
+/*       square->array[tuple].col = col1; */
+/*       /\*   continue; *\/ */
+/*     }     */
+/*   } */
+/* } */
 
 void swap_rows(Latin_Square *square, size_t row1, size_t row2)
 {
@@ -123,6 +123,42 @@ void swap_rows(Latin_Square *square, size_t row1, size_t row2)
 
   free(temp_row1);
   free(temp_row2);
+}
+
+void swap_cols(Latin_Square *square, size_t col1, size_t col2)
+{
+  Cell *temp_col1 = (Cell*)malloc(square->key.count * sizeof(Cell));
+  Cell *temp_col2 = (Cell*)malloc(square->key.count * sizeof(Cell));
+  size_t temp_1 = 0;
+  size_t temp_2 = 0;
+  
+  for (size_t tuple = 0; tuple < square->size; tuple++) {
+    if (square->array[tuple].col == col1) 
+      temp_col1[temp_1++] = square->array[tuple];
+    if (square->array[tuple].col == col2)
+      temp_col2[temp_2++] = square->array[tuple];
+    //   printf(" %lu\n", tuple % square->key.count);
+  }
+
+  temp_1 = 0;
+  temp_2 = 0;
+  for (size_t tuple = 0; tuple < square->size; tuple++) {
+    if (square->array[tuple].col == col1) {
+      square->array[tuple] = temp_col2[temp_2++];
+      square->array[tuple].col = col1;
+    } else if (square->array[tuple].col == col2) {
+      square->array[tuple] = temp_col1[temp_1++];
+      square->array[tuple].col = col2;
+    }
+  }
+
+  for (size_t i = 0; i < (square->key.count); i++) {
+    printf("%lu-%lu-%c\n", temp_col1[i].row, temp_col1[i].col, temp_col1[i].elem);}
+    for (size_t i = 0; i < (square->key.count); i++) {
+    printf("%lu-%lu-%c\n", temp_col2[i].row, temp_col2[i].col, temp_col2[i].elem);}
+
+  free(temp_col1);
+  free(temp_col2);
 }
 
 Latin_Square make_latin_square(String_View key)
@@ -166,20 +202,22 @@ void print_latin_square(Latin_Square *square, size_t flag)
 int main(int argc, char **argv)
 {
   
-  // String_View key = SV("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-   String_View key = SV("ABCDEFGHIJKLM");
+  String_View key = SV("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+  // String_View key = SV("ABCDEFGHIJKLM");
   Latin_Square a = make_latin_square(key);
 
-  swap_cells(&a, 'A', 'Z');
-  // swap_cols(&a, 1, 5);
+  //swap_cells(&a, 'A', 'Z');
+  swap_cols(&a, 1, 5);
   swap_rows(&a, 4, 3);
-   swap_rows(&a, 3, 4);
-  print_latin_square(&a, 1);
+  swap_rows(&a, 3, 4);
+   printf("\n");
+   print_latin_square(&a, 0);
 
   (is_latin_square(&a))
     ? printf("\nThis is a latin square.\n")
     : printf("\nThis is NOT a latin square.\n");
-  
+
   free(a.array);
+  
   return 0;
 }
