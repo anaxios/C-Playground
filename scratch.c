@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <math.h>
+#include <time.h>
 
 typedef struct {
   size_t count;
@@ -152,13 +153,31 @@ void swap_cols(Latin_Square *square, size_t col1, size_t col2)
     }
   }
 
-  for (size_t i = 0; i < (square->key.count); i++) {
-    printf("%lu-%lu-%c\n", temp_col1[i].row, temp_col1[i].col, temp_col1[i].elem);}
-    for (size_t i = 0; i < (square->key.count); i++) {
-    printf("%lu-%lu-%c\n", temp_col2[i].row, temp_col2[i].col, temp_col2[i].elem);}
+  /* for (size_t i = 0; i < (square->key.count); i++) { */
+  /*   printf("%lu-%lu-%c\n", temp_col1[i].row, temp_col1[i].col, temp_col1[i].elem);} */
+  /*   for (size_t i = 0; i < (square->key.count); i++) { */
+  /*   printf("%lu-%lu-%c\n", temp_col2[i].row, temp_col2[i].col, temp_col2[i].elem);} */
 
   free(temp_col1);
   free(temp_col2);
+}
+
+void randomize_square(Latin_Square *square)
+{
+  time_t t;
+  srand((unsigned) time(&t));
+  for (size_t i = 0; i < 1000000; i++) {
+    int r = rand() % 3;
+    if ( r == 0 ) {
+      swap_cells(square, (rand() % square->key.count), (rand() % square->key.count));
+    } else if ( r == 1 ) {
+      swap_rows(square, (rand() % square->key.count), (rand() % square->key.count));
+    } else {
+      swap_cols(square, (rand() % square->key.count), (rand() % square->key.count));
+    }
+    
+  }
+  //printf("\n%d\n", rand());
 }
 
 Latin_Square make_latin_square(String_View key)
@@ -206,18 +225,21 @@ int main(int argc, char **argv)
   // String_View key = SV("ABCDEFGHIJKLM");
   Latin_Square a = make_latin_square(key);
 
-  //swap_cells(&a, 'A', 'Z');
-  swap_cols(&a, 1, 5);
-  swap_rows(&a, 4, 3);
-  swap_rows(&a, 3, 4);
-   printf("\n");
-   print_latin_square(&a, 0);
+  // swap_cells(&a, 'A', 'Z');
+  // swap_cols(&a, 1, 5);
+  // swap_rows(&a, 4, 3);
+  // swap_rows(&a, 3, 4);
+  randomize_square(&a);
+  // printf("\n");
+  print_latin_square(&a, 0);
 
   (is_latin_square(&a))
-    ? printf("\nThis is a latin square.\n")
-    : printf("\nThis is NOT a latin square.\n");
+    ? printf("\nThis is a true latin square.\n")
+    : printf("\nThis is NOT a true latin square.\n");
 
   free(a.array);
+
+
   
   return 0;
 }
