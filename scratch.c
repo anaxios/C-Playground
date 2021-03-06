@@ -101,7 +101,9 @@ void swap_cells(Latin_Square *square, char elem1, char elem2)
 void swap_rows(Latin_Square *square, size_t row1, size_t row2)
 {
   Cell *temp_row1 = (Cell*)malloc(square->key.count * sizeof(Cell));
+  assert(temp_row1 != NULL);
   Cell *temp_row2 = (Cell*)malloc(square->key.count * sizeof(Cell));
+  assert(temp_row2 != NULL);
   
   for (size_t tuple = 0; tuple < square->size; tuple++) {
     if (square->array[tuple].row == row1)
@@ -130,7 +132,9 @@ void swap_rows(Latin_Square *square, size_t row1, size_t row2)
 void swap_cols(Latin_Square *square, size_t col1, size_t col2)
 {
   Cell *temp_col1 = (Cell*)malloc(square->key.count * sizeof(Cell));
+  assert(temp_col1 != NULL);
   Cell *temp_col2 = (Cell*)malloc(square->key.count * sizeof(Cell));
+  assert(temp_col2 != NULL);
   size_t temp_1 = 0;
   size_t temp_2 = 0;
   
@@ -215,6 +219,7 @@ void encode_square(Latin_Square *square, String_View *key)
   unsigned int l = gcry_md_get_algo_dlen(GCRY_MD_SHA512);
   
   unsigned char *buffer = (unsigned char*)malloc(l);
+  assert(buffer != NULL);
   Hash_View x;
   x.data = (unsigned char*)key->data;
   x.count = key->count;
