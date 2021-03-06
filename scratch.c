@@ -23,6 +23,11 @@ typedef struct {
 #define SV_NULL (String_View) {0}
 
 typedef struct {
+  size_t count;
+  const unsigned char *data;
+} Hash_View;
+
+typedef struct {
   size_t row;
   size_t col;
   char elem;
@@ -65,7 +70,6 @@ bool is_latin_square(Latin_Square *square)
 	  (square->array[to_match].row == square->array[to_search].row
 	   && square->array[to_match].elem == square->array[to_search].elem))
 	return false;
-      
     }
   }
   
@@ -85,33 +89,21 @@ void swap_cells(Latin_Square *square, char elem1, char elem2)
   }
 }
 
-/* void swap_cols(Latin_Square *square, size_t col1, size_t col2) */
-/* { */
-/*   for (size_t tuple = 0; tuple < square->size; tuple++) { */
-/*     if (square->array[tuple].col == col1) { */
-/*       square->array[tuple].col = '0'; */
-/*       /\*   continue; *\/ */
-/*     } else if (square->array[tuple].col == col2) { */
-/*       square->array[tuple].col = col1; */
-/*       /\*   continue; *\/ */
-/*     }     */
-/*   } */
-/* } */
-
 void swap_rows(Latin_Square *square, size_t row1, size_t row2)
 {
   Cell *temp_row1 = (Cell*)malloc(square->key.count * sizeof(Cell));
   assert(temp_row1 != NULL);
   Cell *temp_row2 = (Cell*)malloc(square->key.count * sizeof(Cell));
   assert(temp_row2 != NULL);
-  
+
+  // Load temp variables
   for (size_t tuple = 0; tuple < square->size; tuple++) {
     if (square->array[tuple].row == row1)
       temp_row1[tuple % square->key.count] = square->array[tuple];
     if (square->array[tuple].row == row2)
       temp_row2[tuple % square->key.count] = square->array[tuple];
   }
-
+  // do the swap
   for (size_t tuple = 0; tuple < square->size; tuple++) {
     if (square->array[tuple].row == row1) {
       square->array[tuple] = temp_row2[tuple % square->key.count];
@@ -121,9 +113,6 @@ void swap_rows(Latin_Square *square, size_t row1, size_t row2)
       square->array[tuple].row = row2;
     }
   }
-
-    //  for (size_t i = 0; i < (square->key.count); i++) {
-    //printf("%lu-%lu-%c\n", temp[i].row, temp[i].col, temp[i].elem);}
 
   free(temp_row1);
   free(temp_row2);
@@ -137,17 +126,19 @@ void swap_cols(Latin_Square *square, size_t col1, size_t col2)
   assert(temp_col2 != NULL);
   size_t temp_1 = 0;
   size_t temp_2 = 0;
-  
+
+  // load temp variables
   for (size_t tuple = 0; tuple < square->size; tuple++) {
     if (square->array[tuple].col == col1) 
       temp_col1[temp_1++] = square->array[tuple];
     if (square->array[tuple].col == col2)
       temp_col2[temp_2++] = square->array[tuple];
-    //   printf(" %lu\n", tuple % square->key.count);
   }
 
-  temp_1 = 0;
-  temp_2 = 0;
+  // reset temp counters
+  temp_1 = 0; temp_2 = 0;
+
+  // make the swap
   for (size_t tuple = 0; tuple < square->size; tuple++) {
     if (square->array[tuple].col == col1) {
       square->array[tuple] = temp_col2[temp_2++];
@@ -157,11 +148,6 @@ void swap_cols(Latin_Square *square, size_t col1, size_t col2)
       square->array[tuple].col = col2;
     }
   }
-
-  /* for (size_t i = 0; i < (square->key.count); i++) { */
-  /*   printf("%lu-%lu-%c\n", temp_col1[i].row, temp_col1[i].col, temp_col1[i].elem);} */
-  /*   for (size_t i = 0; i < (square->key.count); i++) { */
-  /*   printf("%lu-%lu-%c\n", temp_col2[i].row, temp_col2[i].col, temp_col2[i].elem);} */
 
   free(temp_col1);
   free(temp_col2);
@@ -180,44 +166,29 @@ void randomize_square(Latin_Square *square)
     } else {
       swap_cols(square, (rand() % square->key.count), (rand() % square->key.count));
     }
-    
   }
-  //printf("\n%d\n", rand());
 }
-
-typedef struct {
-  size_t count;
-  const unsigned char *data;
-} Hash_View;
 
 unsigned char* hash(Hash_View *key, unsigned char *buffer)
 {
-  /* for (size_t i = 0; i < key->count; i++) { */
-  /*   printf("%02x", key->data[i]); /\* print the result *\/ */
-  /* } */
-  //  printf("\n");
   unsigned int l = gcry_md_get_algo_dlen(GCRY_MD_SHA512);
   gcry_md_hd_t h;
   gcry_md_open(&h, GCRY_MD_SHA512, GCRY_MD_FLAG_SECURE);
-  //gcry_md_enable(h, GCRY_MD_SHA512);
+  //gcry_md_enable(h, GCRY_MD_SHA512); // use for multiple hash functions
   gcry_md_write(h, key->data, key->count);
   unsigned char *x = gcry_md_read(h, GCRY_MD_SHA512);
-  //gcry_md_close(h);
+
   for (size_t i = 0; i < l; i++) {
-    //   printf("%02x", x[i]); /* print the result */
     buffer[i] = x[i];
   }
-  //  printf("\n");
+
   gcry_md_close(h);
   return buffer;
 }
 
-
-
 void encode_square(Latin_Square *square, String_View *key)
 {
   unsigned int l = gcry_md_get_algo_dlen(GCRY_MD_SHA512);
-  
   unsigned char *buffer = (unsigned char*)malloc(l);
   assert(buffer != NULL);
   Hash_View x;
@@ -225,14 +196,13 @@ void encode_square(Latin_Square *square, String_View *key)
   x.count = key->count;
   x.data = hash(&x, buffer);
   x.count = sizeof(x.data);
-
   
   size_t n = 0;
+  // set n < a larger number to encode with a hash of the previous hash
   while (n < 1 ) {
     x.data = hash(&x, buffer);
     /* for (size_t i = 0; i < l; i++) { */
     /*   printf("%02x", x.data[i]); /\* print the result *\/ */
-
     /* } */
     /* printf("\n\n"); */
 
@@ -254,8 +224,10 @@ void encode_square(Latin_Square *square, String_View *key)
     
     n++;
   }
+  
   free(buffer);
 }
+
 Latin_Square make_latin_square(String_View key)
 {
   Latin_Square square;
@@ -263,8 +235,8 @@ Latin_Square make_latin_square(String_View key)
   square.size = key.count * key.count;
   square.array = (Cell *)malloc(square.size * sizeof(Cell));
   assert(square.array != NULL);
-  size_t r = -1;
-  //  printf("%lu", square.key);
+  size_t r = -1; // so first iteration row will be set to 0
+
   for (size_t tuple = 0; tuple < square.size; tuple++) {
     if (tuple % key.count == 0) r++;
     square.array[tuple] = (Cell) { .row = r,
@@ -277,13 +249,13 @@ Latin_Square make_latin_square(String_View key)
 
 void print_latin_square(Latin_Square *square, size_t flag)
 {
+  // set flag to 0 for elems only or 1 to seet row, col and elem
   if (flag == 0) {
     for (size_t tuple = 0; tuple < square->size; tuple++)  {
       printf("%c ", square->array[tuple].elem);
     if (square->array[tuple].col == (square->key.count - 1)) printf("\n");
     }
   } else {
-  //size_t s = sizeof(square->square) / sizeof  square->square[0];
     for (size_t tuple = 0; tuple < square->size; tuple++)  {
       printf("|%lu,%lu,%c|",
 	     square->array[tuple].row,
@@ -296,7 +268,6 @@ void print_latin_square(Latin_Square *square, size_t flag)
 
 int main(int argc, char **argv)
 {
-  
   String_View seed = SV("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
   String_View key = SV("monkey123");
   Latin_Square a = make_latin_square(seed);
