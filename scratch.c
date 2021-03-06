@@ -280,7 +280,7 @@ void print_latin_square(Latin_Square *square, size_t flag)
   } else {
   //size_t s = sizeof(square->square) / sizeof  square->square[0];
     for (size_t tuple = 0; tuple < square->size; tuple++)  {
-      printf("|%lu,%lu%c|",
+      printf("|%lu,%lu,%c|",
 	     square->array[tuple].row,
 	     square->array[tuple].col,
 	     square->array[tuple].elem);
