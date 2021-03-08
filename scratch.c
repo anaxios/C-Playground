@@ -424,8 +424,11 @@ int main(int argc, char **argv)
     : printf("\nThis is NOT a true latin square.\n");
   get_column(&a, 6);
   free(a.array);
-
-
+  
+  // TODO : algorithm to extract passcode  
+  // TODO : function to translate url to valid chars
+  // TODO : deal with cmd args
+  // TODO : deal with exceptions
   
   return 0;
 }
