@@ -22,6 +22,21 @@ typedef struct {
 
 #define SV_NULL (String_View) {0}
 
+#define PRINT_CELL(cell)			\
+  printf("|%lu,%lu,%c|",			\
+	 cell.row,				\
+	 cell.col,				\
+	 cell.elem);				\
+  printf("\n");
+
+#define PRINT_RC(rc)						\
+  for (size_t i = 0; i < 26; i++) {			\
+    printf("|%lu,%lu,%c|",					\
+	   rc.array[i].row,						\
+	   rc.array[i].col,						\
+	   rc.array[i].elem);}						\
+  printf("\n");							\
+
 typedef struct {
   size_t count;
   const unsigned char *data;
@@ -38,6 +53,11 @@ typedef struct {
   size_t size;
   Cell *array;
 } Latin_Square;
+
+typedef struct {
+  size_t length;
+  Cell *array;
+} Row_Col;
 
 size_t exponent(size_t n)
 {
@@ -247,6 +267,122 @@ Latin_Square make_latin_square(String_View key)
   return square;
 }
 
+Row_Col get_column(Latin_Square *square, size_t col)
+{
+  Row_Col temp;
+  temp.array = (Cell*)malloc(square->key.count * sizeof(Cell));
+  temp.length = square->key.count;
+  assert(temp.array != NULL);
+  size_t temp_index = 0;
+  
+  for (size_t sq_index = 0; sq_index < square->size; sq_index++) {
+    if (square->array[sq_index].col == col) {
+      temp.array[temp_index] = square->array[sq_index];
+      /* printf("%lu,%c,%lu ", */
+      /* 	     temp.array[temp_index].row, */
+      /* 	     temp.array[temp_index].elem, */
+      /* 	     temp.array[temp_index].col); */
+      temp_index++;
+    }
+  }
+  
+  return temp;
+}
+
+Row_Col get_row(Latin_Square *square, size_t row)
+{
+  Row_Col temp;
+  temp.array = (Cell*)malloc(square->key.count * sizeof(Cell));
+  temp.length = square->key.count;
+  assert(temp.array != NULL);
+  size_t temp_index = 0;
+
+  // search through square
+  for (size_t sq_index = 0; sq_index < square->size; sq_index++) {
+    if (square->array[sq_index].row == row) {
+      temp.array[temp_index] = square->array[sq_index];
+      /* printf("%lu,%c,%lu ", */
+      /* 	     temp.array[temp_index].row, */
+      /* 	     temp.array[temp_index].elem, */
+      /* 	     temp.array[temp_index].col); */
+      temp_index++;
+    }
+  }
+  
+  return temp;
+}
+
+Cell find_start_point(Latin_Square *square, String_View url)
+{
+  // Alternating rows and columns find the first 6 letters
+  // and then the first letter again as the 7th element
+  // then return that Cell
+  Cell result;
+
+  // get first element
+  Row_Col row = get_row(square, square->array[0].row);
+  //   PRINT_RC(row);
+  for (size_t r_index = 0; r_index < row.length; r_index++) {
+    if (row.array[r_index].elem == url.data[0]) {	  
+      //  PRINT_CELL(row.array[r_index]);
+      result = row.array[r_index];
+    }
+  }
+
+  // get next elements based of the first
+  bool verticle = true;
+  for (size_t index = 0; index < 6; index++) {
+    if (verticle == false) {
+      Row_Col row = get_row(square, result.row);
+      //  PRINT_RC(row);
+      for (size_t r_index = 0; r_index < row.length; r_index++) {
+	if (row.array[r_index].elem == url.data[index + 1]) {	  
+	  //  PRINT_CELL(result);
+	  result = row.array[r_index];
+	  verticle = true;
+	}
+      }
+    } else {
+      Row_Col col = get_column(square, result.col);
+      // PRINT_RC(col);
+      for (size_t c_index = 0; c_index < col.length; c_index++) {
+	if (col.array[c_index].elem == url.data[index + 1]) {
+	  // PRINT_CELL(result);
+	  result = col.array[c_index];
+	  verticle = false;
+	}
+      }
+    }
+  }
+
+  return result;
+}
+
+/* String_View encode_password(Latin_Square *square, String_View url)
+{
+  Cell found_elem;
+  Row_Col found_row_col;
+  Char next_elem;
+  bool verticle = true;
+  // iter url
+  for (size_t url_index = 0; url_index < url.count; url_index++) {
+    // find url_index in first row
+    for (size_t sq_index = 0; sq_index < square->key.count; sq_index++) {
+      if(square->array[sq_index].elem == url_index && square->array[sq_index].row == 0)
+  	found_elem = square->array[sq_index];
+    }
+    
+    found_row_col = get_column(square, found_elem.col);
+    for (size_t col_index = 0; col_index < found_row_col->count; col_index++) {
+      if (url_index + 1 == found_row_col[col_index].elem) {
+  	next_elem = found_row_col[col_index].elem;
+  	verticle = true;
+      }
+      
+    }
+  }
+} */
+
 void print_latin_square(Latin_Square *square, size_t flag)
 {
   // set flag to 0 for elems only or 1 to seet row, col and elem
@@ -271,20 +407,22 @@ int main(int argc, char **argv)
   String_View seed = SV("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
   String_View key = SV("monkey123");
   Latin_Square a = make_latin_square(seed);
+  String_View url = SV("AMAZON");
 
   // swap_cells(&a, 'A', 'Z');
   // swap_cols(&a, 1, 5);
   // swap_rows(&a, 4, 3);
   // swap_rows(&a, 3, 4);
   //randomize_square(&a);
-   encode_square(&a, &key);
-  // printf("\n");
+  encode_square(&a, &key);
+  Cell start = find_start_point(&a, url);
+  PRINT_CELL(start);
   print_latin_square(&a, 0);
-
+  
   (is_latin_square(&a))
     ? printf("\nThis is a true latin square.\n")
     : printf("\nThis is NOT a true latin square.\n");
-
+  get_column(&a, 6);
   free(a.array);
 
 
