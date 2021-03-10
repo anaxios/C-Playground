@@ -31,7 +31,7 @@ typedef struct {
 
 #define PRINT_RC(rc)				\
   printf("| ");					\
-  for (size_t i = 0; i < rc.length; i++) {		\
+  for (size_t i = 0; i < rc.length; i++) {	\
     printf("%lu,%lu,%c | ",			\
 	   rc.array[i].row,			\
 	   rc.array[i].col,			\
@@ -414,12 +414,12 @@ Row_Col encode_password(Latin_Square *square, String_View url, Cell start_point)
       for (size_t c_index = 0; c_index < col.length; c_index++) {
 	if (col.array[c_index].elem == url.data[url_index]) {
 	  // PRINT_CELL(result);
-	  if (result.array[result_index].row < col.array[c_index].row) {
+	  if (result.array[result_index].row <= col.array[c_index].row) {
 	    result_index++;
 	    result.array[result_index] = col.array[(c_index + 1) % col.length];
 	    result_index++;
 	    result.array[result_index] = col.array[(c_index + 2) % col.length];
-	  } else if (result.array[result_index].row >= col.array[c_index].row) {
+	  } else { //if (result.array[result_index].row >= col.array[c_index].row) {
 	    result_index++;
 	    result.array[result_index] = col.array[(c_index - 1) % col.length];
 	    result_index++;
@@ -436,12 +436,12 @@ Row_Col encode_password(Latin_Square *square, String_View url, Cell start_point)
       for (size_t r_index = 0; r_index < row.length; r_index++) {
 	if (row.array[r_index].elem == url.data[url_index]) {	  
 	  //PRINT_RC(result);
-	  if (result.array[result_index].col < row.array[r_index].col) {
+	  if (result.array[result_index].col <= row.array[r_index].col) {
 	    result_index++;
 	    result.array[result_index] = row.array[(r_index + 1) % row.length];
 	    result_index++;
 	    result.array[result_index] = row.array[(r_index + 2) % row.length];
-	  } else if (result.array[result_index].col >= row.array[r_index].col) {
+	  } else { //if (result.array[result_index].col >= row.array[r_index].col) {
 	    result_index++;
 	    result.array[result_index] = row.array[(r_index - 1) % row.length];
 	    result_index++;
