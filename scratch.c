@@ -387,13 +387,13 @@ Row_Col encode_password(Latin_Square *square, String_View url, Cell start_point)
     if (row.array[r_index].elem == url.data[url_index]) {	  
       //PRINT_CELL(row.array[r_index]);
       if (start_point.col < row.array[r_index].col) {
-	result.array[result_index] = row.array[(1 + r_index) % row.length];
-	result_index++;
-	result.array[result_index] = row.array[(2 + r_index) % row.length];
+	result.array[result_index] = row.array[r_index];
+	//	result_index++;
+	//	result.array[result_index] = row.array[(2 + r_index) % row.length];
       } else { // if (result.array[result_index - 1].col > row.array[r_index].col) {
-	result.array[result_index] = row.array[(r_index - 1) % row.length];
-	result_index++;
-	result.array[result_index] = row.array[(r_index - 2) % row.length];
+	result.array[result_index] = row.array[r_index];
+	//	result_index++;
+	//	result.array[result_index] = row.array[(r_index - 2) % row.length];
       }
  
       url_index++;
@@ -414,16 +414,16 @@ Row_Col encode_password(Latin_Square *square, String_View url, Cell start_point)
       for (size_t c_index = 0; c_index < col.length; c_index++) {
 	if (col.array[c_index].elem == url.data[url_index]) {
 	  // PRINT_CELL(result);
-	  if (result.array[result_index].row < col.array[c_index].row) {
+	  if (result.array[result_index].row <= col.array[c_index].row) {
 	    result_index++;
-	    result.array[result_index] = col.array[(c_index + 1) % col.length];
+	    result.array[result_index] = col.array[c_index];
+	    //result_index++;
+	    //result.array[result_index] = col.array[(c_index + 2) % col.length];
+	  } else { //if (result.array[result_index].row > col.array[c_index].row) {
 	    result_index++;
-	    result.array[result_index] = col.array[(c_index + 2) % col.length];
-	  } else if (result.array[result_index].row >= col.array[c_index].row) {
-	    result_index++;
-	    result.array[result_index] = col.array[(c_index - 1) % col.length];
-	    result_index++;
-	    result.array[result_index] = col.array[(c_index - 2) % col.length];
+	    result.array[result_index] = col.array[c_index];
+	    //result_index++;
+	    //result.array[result_index] = col.array[(c_index - 2) % col.length];
 	  }
 	  
 	  url_index++;
@@ -436,16 +436,16 @@ Row_Col encode_password(Latin_Square *square, String_View url, Cell start_point)
       for (size_t r_index = 0; r_index < row.length; r_index++) {
 	if (row.array[r_index].elem == url.data[url_index]) {	  
 	  //PRINT_RC(result);
-	  if (result.array[result_index].col < row.array[r_index].col) {
+	  if (result.array[result_index].col <= row.array[r_index].col) {
 	    result_index++;
-	    result.array[result_index] = row.array[(r_index + 1) % row.length];
+	    result.array[result_index] = row.array[r_index];
+	    //	    result_index++;
+	    //result.array[result_index] = row.array[(r_index + 2) % row.length];
+	  } else { //if (result.array[result_index].col > row.array[r_index].col) {
 	    result_index++;
-	    result.array[result_index] = row.array[(r_index + 2) % row.length];
-	  } else if (result.array[result_index].col >= row.array[r_index].col) {
-	    result_index++;
-	    result.array[result_index] = row.array[(r_index - 1) % row.length];
-	    result_index++;
-	    result.array[result_index] = row.array[(r_index - 2) % row.length];
+	    result.array[result_index] = row.array[r_index];
+	    // result_index++;
+	    //result.array[result_index] = row.array[(r_index - 2) % row.length];
 	  }
 	  
 	  url_index++;
@@ -479,7 +479,7 @@ void print_latin_square(Latin_Square *square, size_t flag)
 int main()
 {
   String_View seed = SV("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-  String_View key = SV("monkey123");
+  String_View key = SV("monkey1234");
   Latin_Square a = make_latin_square(seed);
   String_View url = SV("AMAZON");
 
