@@ -399,10 +399,15 @@ Row_Col encode_password(Latin_Square *square, String_View url, Cell start_point)
       url_index++;
     }
   }
+  /* 
+     monkey1234
+     A M A Z O N
+     SFEBXPGATUVK
+  */
 
   // get next elements based of the first
   // bool verticle = true;
-  for (size_t index = 0; index < url.count; index++) {
+  for (size_t index = 0; index < url.count; index++) {  //printf("%lu\n", result_index);
     if (index % 2 == 0) {
       Row_Col col = get_column(square, result.array[result_index].col);
       //PRINT_RC(col);
@@ -414,7 +419,7 @@ Row_Col encode_password(Latin_Square *square, String_View url, Cell start_point)
 	    result.array[result_index] = col.array[(c_index + 1) % col.length];
 	    result_index++;
 	    result.array[result_index] = col.array[(c_index + 2) % col.length];
-	  } else if (result.array[result_index].row > col.array[c_index].row) {
+	  } else if (result.array[result_index].row >= col.array[c_index].row) {
 	    result_index++;
 	    result.array[result_index] = col.array[(c_index - 1) % col.length];
 	    result_index++;
@@ -422,7 +427,7 @@ Row_Col encode_password(Latin_Square *square, String_View url, Cell start_point)
 	  }
 	  
 	  url_index++;
-	  //verticle = false;
+	  //  verticle = false;
 	}
       }
     } else {
@@ -436,7 +441,7 @@ Row_Col encode_password(Latin_Square *square, String_View url, Cell start_point)
 	    result.array[result_index] = row.array[(r_index + 1) % row.length];
 	    result_index++;
 	    result.array[result_index] = row.array[(r_index + 2) % row.length];
-	  } else if (result.array[result_index].col > row.array[r_index].col) {
+	  } else if (result.array[result_index].col >= row.array[r_index].col) {
 	    result_index++;
 	    result.array[result_index] = row.array[(r_index - 1) % row.length];
 	    result_index++;
@@ -444,7 +449,7 @@ Row_Col encode_password(Latin_Square *square, String_View url, Cell start_point)
 	  }
 	  
 	  url_index++;
-	  //verticle = true;
+	  //  verticle = true;
 	}
       }
     }
@@ -474,7 +479,7 @@ void print_latin_square(Latin_Square *square, size_t flag)
 int main()
 {
   String_View seed = SV("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-  String_View key = SV("monkey1234");
+  String_View key = SV("monkey123");
   Latin_Square a = make_latin_square(seed);
   String_View url = SV("AMAZON");
 
