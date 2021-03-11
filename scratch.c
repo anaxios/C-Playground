@@ -233,6 +233,7 @@ unsigned char *hash(Hash_View *key, unsigned char *buffer)
 
 void encode_square(Latin_Square *square, const String_View *key)
 {
+#define HASH_ROUNDS 100000
   unsigned int l = gcry_md_get_algo_dlen(GCRY_MD_SHA512);
   unsigned char *buffer = (unsigned char*)malloc(l);
   assert(buffer != NULL);
@@ -244,7 +245,7 @@ void encode_square(Latin_Square *square, const String_View *key)
   
   size_t n = 0;
   // set n < a larger number to encode with a hash of the previous hash
-  while (n < 1 ) {
+  while (n < HASH_ROUNDS ) {
     x.data = hash(&x, buffer);
     /* for (size_t i = 0; i < l; i++) { */
     /*   printf("%02x", x.data[i]); /\* print the result *\/ */
