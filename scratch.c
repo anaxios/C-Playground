@@ -231,9 +231,10 @@ unsigned char *hash(Hash_View *key, unsigned char *buffer)
   return buffer;
 }
 
+#define HASH_ROUNDS 1
+
 void encode_square(Latin_Square *square, const String_View *key)
 {
-#define HASH_ROUNDS 1000
   unsigned int l = gcry_md_get_algo_dlen(GCRY_MD_SHA512);
   unsigned char *buffer = (unsigned char*)malloc(l);
   assert(buffer != NULL);
@@ -262,7 +263,7 @@ void encode_square(Latin_Square *square, const String_View *key)
 		  x.data[index] % square->key.count,
 		  x.data[index + 1] % square->key.count);
       } else {
-	swap_rows(square,
+	swap_cols(square,
 		  x.data[index] % square->key.count,
 		  x.data[index + 1] % square->key.count);
       }
@@ -602,10 +603,8 @@ int main(int argc, char *argv[])
   //get_column(&a, 6);
   free(a.array);
   
-  // TODO : algorithm to extract passcode  
   // TODO : function to translate url to valid chars
-  // TODO : deal with cmd args
-  // TODO : deal with exceptions
+  // TODO : deal with exceptions?
   
   return 0;
 }
