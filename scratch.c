@@ -324,44 +324,84 @@ Cell find_start_point(Latin_Square *square, String_View url)
   // and then the first letter again as the 7th element
   // then return that Cell
   Cell result;
-
-  // get first element
-  Row_Col row = get_row(square, square->array[0].row);
+  //result.array = (Cell*)malloc(url.count * 2 * sizeof(Cell));
+  //result.length = url.count * 2;
+  // PRINT_RC(result);
+  // ssize_t result_index = 0;
+  size_t url_index = 0;
+  ssize_t double_mark = 0;  
+  // get first elements
+  Row_Col col;
+  Row_Col row = get_row(square, 0);
   //   PRINT_RC(row);
   for (size_t r_index = 0; r_index < row.length; r_index++) {
-    if (row.array[r_index].elem == url.data[0]) {	  
-      //  PRINT_CELL(row.array[r_index]);
+    if (row.array[r_index].elem == url.data[url_index]) {	  
+      //      if (start_point.col < row.array[r_index].col) {
+      //	result.array[result_index] = row.array[(1 + r_index) % row.length];
+      //		result_index++;
       result = row.array[r_index];
+      if (row.array[r_index].elem == url.data[url_index + 1]) double_mark++;
+		//} else { // if (result.array[result_index - 1].col > row.array[r_index].col) {
+		//result.array[result_index] = row.array[(r_index - 1) % row.length];
+		//	result_index++;
+		//	result.array[result_index] = row.array[(r_index - 2) % row.length];
     }
   }
+  
+  url_index++;
 
-  // get next elements based of the first
-  bool verticle = true;
-  for (size_t index = 0; index < 6; index++) {
-    if (verticle == false) {
-      Row_Col row = get_row(square, result.row);
-      //  PRINT_RC(row);
-      for (size_t r_index = 0; r_index < row.length; r_index++) {
-	if (row.array[r_index].elem == url.data[index + 1]) {	  
-	  //  PRINT_CELL(result);
-	  result = row.array[r_index];
-	  verticle = true;
-	}
-      }
-    } else {
-      Row_Col col = get_column(square, result.col);
-      // PRINT_RC(col);
+  // get next elements based off the first
+  for (size_t index = 0; index < url.count; index++) {
+    if (index % 2 == 0) {
+      col = get_column(square, (result.col + double_mark) % 26);
+      double_mark = 0;
+      //PRINT_RC(col);
       for (size_t c_index = 0; c_index < col.length; c_index++) {
-	if (col.array[c_index].elem == url.data[index + 1]) {
+	if (col.array[c_index].elem == url.data[url_index]) {
 	  // PRINT_CELL(result);
-	  result = col.array[c_index];
-	  verticle = false;
+	  if (result.row < col.array[c_index].row) {
+	    //	    result_index++;
+	    result = col.array[c_index];
+	    //	    result_index++;
+	    //	    result.array[result_index] = col.array[(c_index + 2) % col.length];
+	    if (col.array[c_index].elem == url.data[url_index + 1]) double_mark++;
+	  } else {
+		  //	    result_index++;
+	    result = col.array[c_index];
+	    //	    result_index++;
+	    //	    result.array[result_index] = col.array[(c_index - 2) % col.length];
+	    if (col.array[c_index].elem == url.data[url_index + 1]) double_mark--;
+	  }
 	}
       }
+      url_index++;      
+    } else {
+      Row_Col row = get_row(square, (result.row + double_mark) % 26);
+      double_mark = 0;
+      //PRINT_RC(row);
+      for (size_t r_index = 0; r_index < row.length; r_index++) {
+	if (row.array[r_index].elem == url.data[url_index]) {	  
+	  //PRINT_RC(result);
+	  if (result.col < row.array[r_index].col) {
+	    //	    result_index++;
+	    result = row.array[r_index];
+	    // 	    result_index++;
+	  //	    result.array[result_index] = row.array[(r_index + 2) % row.length];
+	    if (row.array[r_index].elem == url.data[url_index + 1]) double_mark++;
+	  } else { //if (result.array[result_index].col > row.array[r_index].col) {
+	  //	    result_index++;
+	    result = row.array[r_index];
+	    //	     result_index++;
+	    //	    result.array[result_index] = row.array[(r_index - 2) % row.length];
+	    if (row.array[r_index].elem == url.data[url_index + 1]) double_mark--;	    
+	  }
+	}
+      }
+      url_index++;
     }
   }
-
-  return result;
+      
+    return result;
 }
 
 Row_Col encode_password(Latin_Square *square, String_View url, Cell start_point)
@@ -379,7 +419,8 @@ Row_Col encode_password(Latin_Square *square, String_View url, Cell start_point)
   // PRINT_RC(result);
   ssize_t result_index = 0;
   size_t url_index = 0;
-  
+  ssize_t double_mark = 0;
+
   // get first elements
   Row_Col row = get_row(square, start_point.row);
   //   PRINT_RC(row);
@@ -390,10 +431,12 @@ Row_Col encode_password(Latin_Square *square, String_View url, Cell start_point)
 	result.array[result_index] = row.array[(1 + r_index) % row.length];
 		result_index++;
 		result.array[result_index] = row.array[(2 + r_index) % row.length];
+		if (row.array[result_index].elem == url.data[url_index + 1]) double_mark++;
       } else { // if (result.array[result_index - 1].col > row.array[r_index].col) {
 	result.array[result_index] = row.array[(r_index - 1) % row.length];
 		result_index++;
 		result.array[result_index] = row.array[(r_index - 2) % row.length];
+		if (row.array[result_index].elem == url.data[url_index + 1]) double_mark--;
       }
  
       
@@ -401,16 +444,16 @@ Row_Col encode_password(Latin_Square *square, String_View url, Cell start_point)
   }
   url_index++;
   /* 
-     monkey1234
-     A M A Z O N
-     SFEBXPGATUVK
+     monkey123
+     G O O G L E
+     JIWLVYVOTDUB
   */
-  ssize_t double_mark = 0;
   // get next elements based of the first
   // bool verticle = true;
   for (size_t index = 0; index < url.count; index++) {
     if (index % 2 == 0) {
-      Row_Col col = get_column(square, result.array[result_index].col + double_mark);
+      Row_Col col = get_column(square, (result.array[result_index].col + double_mark) % 26);
+      double_mark = 0;
       //PRINT_RC(col);
       for (size_t c_index = 0; c_index < col.length; c_index++) {
 	if (col.array[c_index].elem == url.data[url_index]) {
@@ -432,7 +475,8 @@ Row_Col encode_password(Latin_Square *square, String_View url, Cell start_point)
       }
       url_index++;      
     } else {
-      Row_Col row = get_row(square, result.array[result_index].row + double_mark);
+      Row_Col row = get_row(square, (result.array[result_index].row + double_mark) % 26);
+      double_mark = 0;
       //PRINT_RC(row);
       for (size_t r_index = 0; r_index < row.length; r_index++) {
 	if (row.array[r_index].elem == url.data[url_index]) {	  
@@ -485,7 +529,7 @@ int main()
   String_View seed = SV("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
   String_View key = SV("monkey123");
   Latin_Square a = make_latin_square(seed);
-  String_View url = SV("AMAZON");
+  String_View url = SV("GOOGLE\0");
 
   // swap_cells(&a, 'A', 'Z');
   // swap_cols(&a, 1, 5);
