@@ -530,6 +530,7 @@ void print_latin_square(Latin_Square *square, size_t flag)
 {
   // set flag to 0 for elems only or 1 to seet row, col and elem
   if (flag == 0) {
+    printf("0 1 2 3 4 5 6 7 8 9 - . \n");
     for (size_t tuple = 0; tuple < square->size; tuple++)  {
       printf("%c ", square->array[tuple].elem);
     if (square->array[tuple].col == (square->key.count - 1)) printf("\n");
