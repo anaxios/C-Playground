@@ -434,6 +434,7 @@ Row_Col encode_password(Latin_Square *square, String_View url, Cell start_point)
   
   Row_Col result;
   result.array = (Cell*)malloc(url.count * 2 * sizeof(Cell));
+  assert(result.array != NULL);
   result.length = url.count * 2;
   // PRINT_RC(result);
   ssize_t result_index = 0;
