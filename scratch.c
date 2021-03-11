@@ -371,7 +371,7 @@ Row_Col encode_password(Latin_Square *square, String_View url, Cell start_point)
   // then return that Cell
 
   /* A M A Z O N 
-     CYOXCYNBFKCD*/
+     CYOXCYNBFKDC*/
   
   Row_Col result;
   result.array = (Cell*)malloc(url.count * 2 * sizeof(Cell));
