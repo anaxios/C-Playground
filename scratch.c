@@ -20,7 +20,26 @@ typedef struct {
         .data = (cstr_lit) \
     })
 
+String_View sv_from_cstr(const char *cstr)
+{
+  return (String_View) {
+    .count = strlen(cstr),
+			  .data = cstr,
+			  };
+}
+
+char *shift(int *argc, char ***argv)
+{
+  assert(*argc > 0);
+  char *result = **argv;
+  *argv += 1;
+  *argc -= 1;
+  return result;
+}
+
 #define SV_NULL (String_View) {0}
+
+#define PRINT_NL printf("\n");
 
 #define PRINT_CELL(cell)			\
   printf("| %lu,%lu,%c |",			\
@@ -212,7 +231,7 @@ unsigned char *hash(Hash_View *key, unsigned char *buffer)
   return buffer;
 }
 
-void encode_square(Latin_Square *square, String_View *key)
+void encode_square(Latin_Square *square, const String_View *key)
 {
   unsigned int l = gcry_md_get_algo_dlen(GCRY_MD_SHA512);
   unsigned char *buffer = (unsigned char*)malloc(l);
@@ -523,30 +542,55 @@ void print_latin_square(Latin_Square *square, size_t flag)
     }
   }
 }
-// int argc, char **argv
-int main()
+
+int main(int argc, char *argv[])
 {
+  const char *const program = shift(&argc, &argv);        // skip program
+  
   String_View seed = SV("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-  String_View key = SV("monkey123");
   Latin_Square a = make_latin_square(seed);
-  String_View url = SV("GOOGLE\0");
+  
+  if (argc == 0) {
+    printf("Help message\n");
+    exit(0);
+  } else if (argc == 1) {
+    const String_View key = sv_from_cstr(shift(&argc, &argv));
+    encode_square(&a, &key);
+    PRINT_NL;
+    print_latin_square(&a, 0);
+    PRINT_NL;    
+  } else if (argc == 2) {
+    const String_View key = sv_from_cstr(shift(&argc, &argv));
+    const String_View url = sv_from_cstr(shift(&argc, &argv));
+    encode_square(&a, &key);
+    Cell start = find_start_point(&a, url);
+    Row_Col pass = encode_password(&a, url, start);
+    PRINT_NL;
+    print_latin_square(&a, 0);
+    PRINT_NL;
+    PRINT_PASS(pass);
+    PRINT_NL;
+  } else {printf("%s\n exited very badly", program); exit(1);}
+
+  //  String_View key = SV("monkey123");
+  
+  //  String_View url = SV("GOOGLE\0");
 
   // swap_cells(&a, 'A', 'Z');
   // swap_cols(&a, 1, 5);
   // swap_rows(&a, 4, 3);
   // swap_rows(&a, 3, 4);
   //randomize_square(&a);
-  encode_square(&a, &key);
-  Cell start = find_start_point(&a, url);
-  Row_Col pass = encode_password(&a, url, start);
-  PRINT_CELL(start);
-  print_latin_square(&a, 0);
-  PRINT_RC(pass);
-  PRINT_PASS(pass);
-  (is_latin_square(&a))
-    ? printf("\nThis is a true latin square.\n")
-    : printf("\nThis is NOT a true latin square.\n");
-  get_column(&a, 6);
+
+
+  //  PRINT_CELL(start);
+
+  //  PRINT_RC(pass);
+
+  //(is_latin_square(&a))
+  //  ? printf("\nThis is a true latin square.\n")
+  //  : printf("\nThis is NOT a true latin square.\n");
+  //get_column(&a, 6);
   free(a.array);
   
   // TODO : algorithm to extract passcode  
