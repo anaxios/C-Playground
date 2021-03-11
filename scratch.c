@@ -233,7 +233,7 @@ unsigned char *hash(Hash_View *key, unsigned char *buffer)
 
 void encode_square(Latin_Square *square, const String_View *key)
 {
-#define HASH_ROUNDS 100000
+#define HASH_ROUNDS 1000
   unsigned int l = gcry_md_get_algo_dlen(GCRY_MD_SHA512);
   unsigned char *buffer = (unsigned char*)malloc(l);
   assert(buffer != NULL);
@@ -553,7 +553,13 @@ int main(int argc, char *argv[])
   Latin_Square a = make_latin_square(seed);
   
   if (argc == 0) {
-    printf("Help message\n");
+    PRINT_NL;
+    printf("Here's a random latin square:\n");
+    randomize_square(&a);
+    print_latin_square(&a, 0);
+    PRINT_NL;
+    printf("Help message goes here\n");
+    PRINT_NL;
     exit(0);
   } else if (argc == 1) {
     const String_View key = sv_from_cstr(shift(&argc, &argv));
@@ -582,7 +588,7 @@ int main(int argc, char *argv[])
   // swap_cols(&a, 1, 5);
   // swap_rows(&a, 4, 3);
   // swap_rows(&a, 3, 4);
-  //randomize_square(&a);
+ 
 
 
   //  PRINT_CELL(start);
