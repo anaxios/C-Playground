@@ -405,12 +405,12 @@ Row_Col encode_password(Latin_Square *square, String_View url, Cell start_point)
      A M A Z O N
      SFEBXPGATUVK
   */
-
+  ssize_t double_mark = 0;
   // get next elements based of the first
   // bool verticle = true;
   for (size_t index = 0; index < url.count; index++) {
     if (index % 2 == 0) {
-      Row_Col col = get_column(square, result.array[result_index].col);
+      Row_Col col = get_column(square, result.array[result_index].col + double_mark);
       //PRINT_RC(col);
       for (size_t c_index = 0; c_index < col.length; c_index++) {
 	if (col.array[c_index].elem == url.data[url_index]) {
@@ -418,22 +418,21 @@ Row_Col encode_password(Latin_Square *square, String_View url, Cell start_point)
 	  if (result.array[result_index].row < col.array[c_index].row) {
 	    result_index++;
 	    result.array[result_index] = col.array[(c_index + 1) % col.length];
-	  result_index++;
-	  result.array[result_index] = col.array[(c_index + 2) % col.length];
+	    result_index++;
+	    result.array[result_index] = col.array[(c_index + 2) % col.length];
+	    if (col.array[result_index].elem == url.data[url_index + 1]) double_mark++;
 	  } else { //if (result.array[result_index].row > col.array[c_index].row) {
 	    result_index++;
 	    result.array[result_index] = col.array[(c_index - 1) % col.length];
 	    result_index++;
 	    result.array[result_index] = col.array[(c_index - 2) % col.length];
+	    if (col.array[result_index].elem == url.data[url_index + 1]) double_mark--;
 	  }
-	  
-
-	  //  verticle = false;
 	}
       }
       url_index++;      
     } else {
-      Row_Col row = get_row(square, result.array[result_index].row);
+      Row_Col row = get_row(square, result.array[result_index].row + double_mark);
       //PRINT_RC(row);
       for (size_t r_index = 0; r_index < row.length; r_index++) {
 	if (row.array[r_index].elem == url.data[url_index]) {	  
@@ -443,11 +442,13 @@ Row_Col encode_password(Latin_Square *square, String_View url, Cell start_point)
 	    result.array[result_index] = row.array[(r_index + 1) % row.length];
 	    	    result_index++;
 	    result.array[result_index] = row.array[(r_index + 2) % row.length];
+	    if (row.array[result_index].elem == url.data[url_index + 1]) double_mark++;
 	  } else { //if (result.array[result_index].col > row.array[r_index].col) {
 	    result_index++;
 	    result.array[result_index] = row.array[(r_index - 1) % row.length];
 	     result_index++;
 	    result.array[result_index] = row.array[(r_index - 2) % row.length];
+	    if (row.array[result_index].elem == url.data[url_index + 1]) double_mark--;	    
 	  }
 	  
 
