@@ -6,6 +6,7 @@
 #include <math.h>
 #include <time.h>
 #include <gcrypt.h>
+#include <ctype.h>
 
 typedef struct {
   size_t count;
@@ -92,11 +93,6 @@ size_t exponent(size_t n)
   }
   return temp;
 }
-
-/* Latin_Square switch_columns(Latin_Sqaure square,size_t col1, size_t col2) */
-/* { */
-/*   return */
-/* } */
 
 bool is_latin_square(Latin_Square *square)
 {
@@ -247,7 +243,6 @@ void encode_square(Latin_Square *square, const String_View *key)
   size_t n = 0;
   // set n < a larger number to encode with a hash of the previous hash
   while (n < HASH_ROUNDS ) {
-    x.data = hash(&x, buffer);
     /* for (size_t i = 0; i < l; i++) { */
     /*   printf("%02x", x.data[i]); /\* print the result *\/ */
     /* } */
@@ -268,7 +263,8 @@ void encode_square(Latin_Square *square, const String_View *key)
 		  x.data[index + 1] % square->key.count);
       }
     }
-    
+
+    x.data = hash(&x, buffer);
     n++;
   }
   
@@ -547,6 +543,46 @@ void print_latin_square(Latin_Square *square, size_t flag)
   }
 }
 
+#define URL_LENGTH_TO_USE 6
+String_View sanitize_string(Latin_Square *square, String_View url)
+{
+  char *result = (char*)malloc(URL_LENGTH_TO_USE * sizeof(char));
+  assert(result);
+  Row_Col first_row = get_row(square, 0);
+
+  //result.count = 6;
+  
+  if (url.count < URL_LENGTH_TO_USE) {
+    printf("url too short\n");
+    exit(1);
+  }
+  
+  for (size_t index = 0; index < URL_LENGTH_TO_USE; index++) {
+    // whitelist only valid URL chars
+    if (!((url.data[index] > 64 && url.data[index] < 91)
+	  || (url.data[index] > 96 && url.data[index] < 123)
+	  || (url.data[index] > 44 && url.data[index] < 47)
+	  || (url.data[index] > 47 && url.data[index] < 58))) {
+      printf("URL contains invalid character: %c\n", url.data[index]);
+      exit(1);    
+    } else {
+      // account for digits 
+      if (url.data[index] > 47 && url.data[index] < 58) {
+	size_t i = url.data[index] - 48;
+	result[index] = first_row.array[i].elem;
+      } else if (url.data[index] == 45) { // '-'
+	result[index] = first_row.array[10].elem;
+      } else if (url.data[index] == 46) { // '.'
+	result[index] = first_row.array[11].elem;
+      } else {
+	result[index] = toupper(url.data[index]);
+      }
+    }
+  }
+    
+  return (String_View) { .data = result, .count = URL_LENGTH_TO_USE };
+}
+
 int main(int argc, char *argv[])
 {
   const char *const program = shift(&argc, &argv);        // skip program
@@ -571,8 +607,11 @@ int main(int argc, char *argv[])
     PRINT_NL;    
   } else if (argc == 2) {
     const String_View key = sv_from_cstr(shift(&argc, &argv));
-    const String_View url = sv_from_cstr(shift(&argc, &argv));
     encode_square(&a, &key);
+    const String_View url = sanitize_string(&a, sv_from_cstr(shift(&argc, &argv)));
+    //String_View sanitized_url = sanitize_string(&a, url);
+    //printf(SV_Fmt"\n", SV_Arg(sanitized_url)); 
+
     Cell start = find_start_point(&a, url);
     Row_Col pass = encode_password(&a, url, start);
     PRINT_NL;
