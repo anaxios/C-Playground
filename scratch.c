@@ -441,16 +441,14 @@ Row_Col encode_password(Latin_Square *square, String_View url, Cell start_point)
 
   // get first elements
   Row_Col row = get_row(square, start_point.row);
-  //   PRINT_RC(row);
   for (size_t r_index = 0; r_index < row.length; r_index++) {
     if (row.array[r_index].elem == url.data[url_index]) {	  
-      //PRINT_CELL(row.array[r_index]);
       if (start_point.col < row.array[r_index].col) {
 	result.array[result_index] = row.array[(1 + r_index) % row.length];
 		result_index++;
 		result.array[result_index] = row.array[(2 + r_index) % row.length];
 		if (row.array[result_index].elem == url.data[url_index + 1]) double_mark++;
-      } else { // if (result.array[result_index - 1].col > row.array[r_index].col) {
+      } else {
 	result.array[result_index] = row.array[(r_index - 1) % row.length];
 		result_index++;
 		result.array[result_index] = row.array[(r_index - 2) % row.length];
@@ -461,28 +459,21 @@ Row_Col encode_password(Latin_Square *square, String_View url, Cell start_point)
     }
   }
   url_index++;
-  /* 
-     monkey123
-     G O O G L E
-     JIWLVYVOTDUB
-  */
+
   // get next elements based of the first
-  // bool verticle = true;
   for (size_t index = 0; index < url.count; index++) {
     if (index % 2 == 0) {
       Row_Col col = get_column(square, (result.array[result_index].col + double_mark) % 26);
       double_mark = 0;
-      //PRINT_RC(col);
       for (size_t c_index = 0; c_index < col.length; c_index++) {
 	if (col.array[c_index].elem == url.data[url_index]) {
-	  // PRINT_CELL(result);
 	  if (result.array[result_index].row < col.array[c_index].row) {
 	    result_index++;
 	    result.array[result_index] = col.array[(c_index + 1) % col.length];
 	    result_index++;
 	    result.array[result_index] = col.array[(c_index + 2) % col.length];
 	    if (col.array[result_index].elem == url.data[url_index + 1]) double_mark++;
-	  } else { //if (result.array[result_index].row > col.array[c_index].row) {
+	  } else { 
 	    result_index++;
 	    result.array[result_index] = col.array[(c_index - 1) % col.length];
 	    result_index++;
@@ -495,28 +486,24 @@ Row_Col encode_password(Latin_Square *square, String_View url, Cell start_point)
     } else {
       Row_Col row = get_row(square, (result.array[result_index].row + double_mark) % 26);
       double_mark = 0;
-      //PRINT_RC(row);
       for (size_t r_index = 0; r_index < row.length; r_index++) {
 	if (row.array[r_index].elem == url.data[url_index]) {	  
-	  //PRINT_RC(result);
 	  if (result.array[result_index].col < row.array[r_index].col) {
 	    result_index++;
 	    result.array[result_index] = row.array[(r_index + 1) % row.length];
 	    	    result_index++;
 	    result.array[result_index] = row.array[(r_index + 2) % row.length];
 	    if (row.array[result_index].elem == url.data[url_index + 1]) double_mark++;
-	  } else { //if (result.array[result_index].col > row.array[r_index].col) {
+	  } else {
 	    result_index++;
 	    result.array[result_index] = row.array[(r_index - 1) % row.length];
 	     result_index++;
 	    result.array[result_index] = row.array[(r_index - 2) % row.length];
 	    if (row.array[result_index].elem == url.data[url_index + 1]) double_mark--;	    
 	  }
-	  
-
-	  //  verticle = true;
 	}
       }
+      
       url_index++;
     }
   }
@@ -525,7 +512,7 @@ Row_Col encode_password(Latin_Square *square, String_View url, Cell start_point)
 }
 void print_latin_square(Latin_Square *square, size_t flag)
 {
-  // set flag to 0 for elems only or 1 to seet row, col and elem
+  // set flag to 0 for elems only or 1 to set row, col and elem
   if (flag == 0) {
     printf("0 1 2 3 4 5 6 7 8 9 - . \n");
     for (size_t tuple = 0; tuple < square->size; tuple++)  {
@@ -550,8 +537,6 @@ String_View sanitize_string(Latin_Square *square, String_View url)
   assert(result);
   Row_Col first_row = get_row(square, 0);
 
-  //result.count = 6;
-  
   if (url.count < URL_LENGTH_TO_USE) {
     printf("url too short\n");
     exit(1);
@@ -609,9 +594,6 @@ int main(int argc, char *argv[])
     const String_View key = sv_from_cstr(shift(&argc, &argv));
     encode_square(&a, &key);
     const String_View url = sanitize_string(&a, sv_from_cstr(shift(&argc, &argv)));
-    //String_View sanitized_url = sanitize_string(&a, url);
-    //printf(SV_Fmt"\n", SV_Arg(sanitized_url)); 
-
     Cell start = find_start_point(&a, url);
     Row_Col pass = encode_password(&a, url, start);
     PRINT_NL;
@@ -621,29 +603,15 @@ int main(int argc, char *argv[])
     PRINT_NL;
   } else {printf("%s\n exited very badly", program); exit(1);}
 
-  //  String_View key = SV("monkey123");
-  
-  //  String_View url = SV("GOOGLE\0");
-
-  // swap_cells(&a, 'A', 'Z');
-  // swap_cols(&a, 1, 5);
-  // swap_rows(&a, 4, 3);
-  // swap_rows(&a, 3, 4);
- 
-
-
-  //  PRINT_CELL(start);
-
-  //  PRINT_RC(pass);
-
   //(is_latin_square(&a))
   //  ? printf("\nThis is a true latin square.\n")
   //  : printf("\nThis is NOT a true latin square.\n");
   //get_column(&a, 6);
   free(a.array);
   
-  // TODO : function to translate url to valid chars
-  // TODO : deal with exceptions?
   
+  // TODO : make better errors
+  // TODO : figure out upper lower case scheme
+
   return 0;
 }
