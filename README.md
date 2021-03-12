@@ -2,6 +2,13 @@
 
 *This has not been tested for actual use*
 
+### Build
+*Only tested on Linux*
+
+Requires libgcrypt
+
+Just run `> make`
+
 Type the command into your terminal followed by your master password then the URL 
 and it will produce your grid and your site password.
 
