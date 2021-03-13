@@ -55,3 +55,26 @@ If you only put your master password and no url it will produce your grid.
 If you want a random grid: `> ./latin-square`
 
 based on Steve Gibson's cool [Off the Grid](https://www.grc.com/offthegrid.htm) System. Check there to learn what it is and how to use it.
+
+### Latin Square Dance:
+I call the algorithm used to scramble the grid "Latin Square Dance".
+
+Firstly, I have no idea how cryptography works. I don't even have a reasonable guess as to how encrypted the grids come out. Nevertheless, I will try to describe the algorithm.
+
+- produce a 26 x 26 latin square of the alphabet row wise in order, shifting each row one character to the right
+- Create a sha512 hash from a passphrase of your choosing
+ie `f4461bf763358e97d9a49c28bae22c360711cde072238e67b624fb75a0f2cbb40ad4e36765ca086c94ab4c60a72fcf154bc97de8e2255f9dc5a9378cd5868d55`
+- using each character but the last (511 characters) of the hash swap either two sets of characters, two rows or two columns picking between them using a modulus of 3. *(These operation preserve the "Latinness" of the square.)*
+  - 0 -> swap characters
+  - 1 -> swap rows
+  - 2 -> swap columns
+- the two rows, columns, or characters to be swapped are:
+  - the current character used in the previous operation and
+  - the one immediately following. *(Which is why only 511 operations are done.)*
+  - These are modulo the length of the alphabet.
+
+At this point I'm not sure the size of each character being used whether it's a byte or an unsighned long or whatever. I'm not even sure if it matters.
+
+Future:
+- make upper and lower case based on the sha512 hash.
+
