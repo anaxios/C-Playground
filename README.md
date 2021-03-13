@@ -107,6 +107,6 @@ Z A B C D E F G H I J K L M N O P Q R S T U V W X Y
 
 At this point I'm not sure the size of each character being used whether it's a byte or an unsighned long or whatever. I'm not even sure if it matters.
 
-*Future:
-- make upper and lower case based on the sha512 hash.*
+*Future:*
+- *make upper and lower case based on the sha512 hash.*
 
