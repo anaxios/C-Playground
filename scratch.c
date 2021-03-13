@@ -38,6 +38,8 @@ char *shift(int *argc, char ***argv)
   return result;
 }
 
+#define GRID(n,r,c) (n)->array[(r) * 26 + (c)]
+
 #define SV_NULL (String_View) {0}
 
 #define PRINT_NL printf("\n");
