@@ -580,7 +580,7 @@ int main(int argc, char *argv[])
   if (argc == 0) {
     PRINT_NL;
     printf("Here's a random latin square:\n");
-    //randomize_square(&a);
+    randomize_square(&a);
     print_latin_square(&a, 0);
     PRINT_NL;
     printf("Help message goes here\n");
